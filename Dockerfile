@@ -1,7 +1,7 @@
 #
 # million12/typo3-flow-neos-abstract
 #
-FROM million12/php-app:php-55
+FROM million12/nginx-php:php-55
 MAINTAINER Marcin Ryzycki marcin@m12.io
 
 # Add all files from container-files/ to the root of the container's filesystem
