@@ -1,11 +1,11 @@
-FROM million12/typo3-flow-neos-abstract:latest
-MAINTAINER Marcin Ryzycki marcin@m12.io
+FROM webdesign2be/flow-neos-abstract:latest
+MAINTAINER Christian Albrecht webdesign2be@gmail.com
 
-# ENV: Repository for installed TYPO3 Flow distribution 
-ENV T3APP_BUILD_REPO_URL git://git.typo3.org/Flow/Distributions/Base.git
+# ENV: Repository for installed Flow distribution 
+ENV APP_BUILD_REPO_URL git://git.typo3.org/Flow/Distributions/Base.git
 
-# ENV: Install following TYPO3 Neos version
-ENV T3APP_BUILD_BRANCH 2.3.0
+# ENV: Install following Neos version
+ENV APP_BUILD_BRANCH 2.3.0
 
-# Pre-install TYPO3 Flow into /tmp directory
-RUN . /build-typo3-app/pre-install-typo3-app.sh
+# Pre-install Flow into /tmp directory
+RUN . /build-app/pre-install-app.sh

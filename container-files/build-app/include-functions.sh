@@ -6,7 +6,7 @@
 #   String: value to log
 #######################################
 log() {
-  if [[ "$@" ]]; then echo "[${T3APP_NAME^^}] $@";
+  if [[ "$@" ]]; then echo "[${APP_NAME^^}] $@";
   else echo; fi
 }
 
@@ -14,9 +14,9 @@ log() {
 # Check in the loop (every 2s) if the database backend
 # service is already available.
 # Globals:
-#   T3APP_DB_HOST: db hostname
-#   T3APP_DB_PORT: db port number
-#   T3APP_DB_USER: db username
+#   APP_DB_HOST: db hostname
+#   APP_DB_PORT: db port number
+#   APP_DB_USER: db username
 #   MYSQL_CMD_PARAMS
 #########################################################
 function wait_for_db() {
@@ -25,7 +25,7 @@ function wait_for_db() {
   while [[ $res -ne 0 ]]; do
     mysql $MYSQL_CMD_PARAMS --execute "status" 1>/dev/null
     res=$?
-    if [[ $res -ne 0 ]]; then log "Waiting for DB service ($T3APP_DB_HOST:$T3APP_DB_PORT username:$T3APP_DB_USER)..." && sleep 2; fi
+    if [[ $res -ne 0 ]]; then log "Waiting for DB service ($APP_DB_HOST:$APP_DB_PORT username:$APP_DB_USER)..." && sleep 2; fi
   done
   set -e
   
@@ -35,33 +35,33 @@ function wait_for_db() {
 }
 
 #########################################################
-# Moves pre-installed in /tmp TYPO3 to its
+# Moves pre-installed in /tmp Neos/Flow to its
 # target location ($APP_ROOT), if it's not there yet
 # Globals:
 #   WEB_SERVER_ROOT
 #   APP_ROOT
-#   T3APP_NAME
-#   T3APP_BUILD_BRANCH
+#   APP_NAME
+#   APP_BUILD_BRANCH
 #########################################################
 function install_typo3_app() {
   # Check if app is already installed (when restaring stopped container)
   if [ ! -d $APP_ROOT ]; then
-    if [ "${T3APP_PREINSTALL^^}" = TRUE ]; then
-      log "Installing TYPO3 app (from pre-installed archive)..."
+    if [ "${APP_PREINSTALL^^}" = TRUE ]; then
+      log "Installing Neos/Flow app (from pre-installed archive)..."
       cd $WEB_SERVER_ROOT && tar -zxf /tmp/$INSTALLED_PACKAGE_NAME.tgz
-      mv $INSTALLED_PACKAGE_NAME $T3APP_NAME
+      mv $INSTALLED_PACKAGE_NAME $APP_NAME
     else
-      log "Installing TYPO3 app..."
+      log "Installing Neos/Flow app..."
       cd $WEB_SERVER_ROOT
-      # Clone TYPO3 app code from provided repository
-      git clone $T3APP_BUILD_REPO_URL $T3APP_NAME
-      cd $T3APP_NAME
+      # Clone Neos/Flow app code from provided repository
+      git clone $APP_BUILD_REPO_URL $APP_NAME
+      cd $APP_NAME
       # Do composer install
-      git checkout $T3APP_BUILD_BRANCH
+      git checkout $APP_BUILD_BRANCH
       git log -10 --pretty=format:"%h %an %cr: %s" --graph
-      COMPOSER_PROCESS_TIMEOUT=900 composer install $T3APP_BUILD_COMPOSER_PARAMS
+      COMPOSER_PROCESS_TIMEOUT=900 composer install $APP_BUILD_COMPOSER_PARAMS
       echo
-      echo "TYPO3 app from $T3APP_BUILD_REPO_URL ($T3APP_BUILD_BRANCH) installed."
+      echo "Neos/Flow app from $APP_BUILD_REPO_URL ($APP_BUILD_BRANCH) installed."
       echo $(ls -lh $CWD)
       echo
     fi
@@ -75,16 +75,16 @@ function install_typo3_app() {
   rm -rf rm -rf Data/Temporary/*
   
   # Debug: show most recent git log messages
-  log "TYPO3 app installed. Most recent commits:"
+  log "Neos/Flow app installed. Most recent commits:"
   git log -5 --pretty=format:"%h %an %cr: %s" --graph && echo # Show most recent changes
   
   # If app is/was already installed, pull the most recent code
-  if [ "${T3APP_ALWAYS_DO_PULL^^}" = TRUE ]; then
+  if [ "${APP_ALWAYS_DO_PULL^^}" = TRUE ]; then
     install_typo3_app_do_pull
   fi
   
   # If composer.lock has changed, this will re-install things...
-  composer install $T3APP_BUILD_COMPOSER_PARAMS
+  composer install $APP_BUILD_COMPOSER_PARAMS
 }
 
 #########################################################
@@ -92,16 +92,16 @@ function install_typo3_app() {
 # It tries to handle the situation even when they are
 # conflicting changes.
 #
-# Called when T3APP_ALWAYS_DO_PULL is set to TRUE.
+# Called when APP_ALWAYS_DO_PULL is set to TRUE.
 #
 # Globals:
 #   WEB_SERVER_ROOT
 #   APP_ROOT
-#   T3APP_NAME
+#   APP_NAME
 #########################################################
 function install_typo3_app_do_pull() {
   set +e # allow non-zero command results (git pull might fail due to code conflicts)
-  log "Pulling the newest codebase (due to T3APP_ALWAYS_DO_PULL set to TRUE)..."
+  log "Pulling the newest codebase (due to APP_ALWAYS_DO_PULL set to TRUE)..."
 
   if [[ ! $(git status | grep "working directory clean") ]]; then
     log "There are some changes in the current working directory. Stashing..."
@@ -112,11 +112,11 @@ function install_typo3_app_do_pull() {
   # Allow switching between branches for running containers
   # E.g. user can provide different branch for `docker build` (in Dockerfile)
   # and different when launching the container.
-  git fetch && git checkout --force $T3APP_BUILD_BRANCH
+  git fetch && git checkout --force $APP_BUILD_BRANCH
   
   if [[ ! $(git pull -f) ]]; then
-    log "git pull failed. Trying once again with 'git reset --hard origin/${T3APP_BUILD_BRANCH}'..."
-    git reset --hard origin/$T3APP_BUILD_BRANCH
+    log "git pull failed. Trying once again with 'git reset --hard origin/${APP_BUILD_BRANCH}'..."
+    git reset --hard origin/$APP_BUILD_BRANCH
   fi
   
   log "Most recent commits (after newest codebase has been pulled):"
@@ -127,7 +127,7 @@ function install_typo3_app_do_pull() {
 
 
 #########################################################
-# Creates database for TYPO3 app, if doesn't exist yet
+# Creates database for Neos/Flow app, if doesn't exist yet
 # Globals:
 #   MYSQL_CMD_PARAMS
 # Arguments:
@@ -135,7 +135,7 @@ function install_typo3_app_do_pull() {
 #########################################################
 function create_app_db() {
   local db_name=$@
-  log "Creating TYPO3 app database '$db_name' (if it doesn't exist yet)..."
+  log "Creating Neos/Flow app database '$db_name' (if it doesn't exist yet)..."
   mysql $MYSQL_CMD_PARAMS --execute="CREATE DATABASE IF NOT EXISTS $db_name CHARACTER SET utf8 COLLATE utf8_unicode_ci"
   log "DB created."
 }
@@ -158,10 +158,10 @@ function create_vhost_conf() {
   if [ ! -f $VHOST_FILE ]; then
     cat $VHOST_SOURCE_FILE > $VHOST_FILE
     log "New vhost file created."
-  # Vhost already exist, but T3APP_FORCE_VHOST_CONF_UPDATE=true, so override it.
-  elif [ "${T3APP_FORCE_VHOST_CONF_UPDATE^^}" = TRUE ]; then
+  # Vhost already exist, but APP_FORCE_VHOST_CONF_UPDATE=true, so override it.
+  elif [ "${APP_FORCE_VHOST_CONF_UPDATE^^}" = TRUE ]; then
     cat $VHOST_SOURCE_FILE > $VHOST_FILE
-    log "Vhost file updated (as T3APP_FORCE_VHOST_CONF_UPDATE is TRUE)."
+    log "Vhost file updated (as APP_FORCE_VHOST_CONF_UPDATE is TRUE)."
   fi
 
   sed -i -r "s#%server_name%#${vhost_names}#g" $VHOST_FILE
@@ -177,13 +177,13 @@ function create_vhost_conf() {
 }
 
 #########################################################
-# Update TYPO3 app Settings.yaml with DB backend settings
+# Update Neos/Flow app Settings.yaml with DB backend settings
 # Globals:
 #   SETTINGS_SOURCE_FILE
-#   T3APP_DB_HOST
-#   T3APP_DB_PORT
-#   T3APP_DB_USER
-#   T3APP_DB_PASS
+#   APP_DB_HOST
+#   APP_DB_PORT
+#   APP_DB_USER
+#   APP_DB_PASS
 # Arguments:
 #   String: filepath to config file to create/configure
 #   String: database name to put in Settings.yaml
@@ -201,17 +201,17 @@ function create_settings_yaml() {
 
   log "Configuring $settings_file..."
   sed -i -r "1,/dbname:/s/dbname: .+?/dbname: $settings_db_name/g" $settings_file
-  sed -i -r "1,/user:/s/user: .+?/user: $T3APP_DB_USER/g" $settings_file
-  sed -i -r "1,/password:/s/password: .+?/password: $T3APP_DB_PASS/g" $settings_file
-  sed -i -r "1,/host:/s/host: .+?/host: $T3APP_DB_HOST/g" $settings_file
-  sed -i -r "1,/port:/s/port: .+?/port: $T3APP_DB_PORT/g" $settings_file
+  sed -i -r "1,/user:/s/user: .+?/user: $APP_DB_USER/g" $settings_file
+  sed -i -r "1,/password:/s/password: .+?/password: $APP_DB_PASS/g" $settings_file
+  sed -i -r "1,/host:/s/host: .+?/host: $APP_DB_HOST/g" $settings_file
+  sed -i -r "1,/port:/s/port: .+?/port: $APP_DB_PORT/g" $settings_file
 
   cat $settings_file
   log "$settings_file updated."
 }
 
 #########################################################
-# Check latest TYPO3 doctrine:migration status.
+# Check latest Neos/Flow doctrine:migration status.
 # Used to detect if this is fresh installation
 # or re-run from previous state.
 #########################################################
@@ -234,7 +234,7 @@ function doctrine_update() {
 #########################################################
 function create_admin_user() {
   log "Creating admin user..."
-  ./flow user:create --roles Administrator $T3APP_USER_NAME $T3APP_USER_PASS $T3APP_USER_FNAME $T3APP_USER_LNAME
+  ./flow user:create --roles Administrator $APP_USER_NAME $APP_USER_PASS $APP_USER_FNAME $APP_USER_LNAME
 }
 
 #########################################################
@@ -245,7 +245,7 @@ function create_admin_user() {
 function neos_site_package_install() {
   local site_package_name=$@
   if [ "${site_package_name^^}" = FALSE ]; then
-    log "Skipping installing site package (T3APP_NEOS_SITE_PACKAGE is set to FALSE)."
+    log "Skipping installing site package (APP_NEOS_SITE_PACKAGE is set to FALSE)."
   else
     log "Installing $site_package_name site package..."
     ./flow site:import --packageKey $site_package_name
@@ -273,23 +273,23 @@ function warmup_cache() {
 }
 
 #########################################################
-# Set correct permission for TYPO3 app
+# Set correct permission for Neos/Flow app
 #########################################################
 function set_permissions() {
   chown -R www:www $APP_ROOT
 }
 
 #########################################################
-# If the installed TYPO3 app contains
-# executable $T3APP_USER_BUILD_SCRIPT file, it will run it.
+# If the installed Neos/Flow app contains
+# executable $APP_USER_BUILD_SCRIPT file, it will run it.
 # This script can be used to do all necessary steps to make
 # the site up&running, e.g. compile CSS.
 #########################################################
 function user_build_script() {
   cd $APP_ROOT;
-  if [[ -x $T3APP_USER_BUILD_SCRIPT ]]; then
+  if [[ -x $APP_USER_BUILD_SCRIPT ]]; then
     # Run ./build.sh script as 'www' user
-    su www -c $T3APP_USER_BUILD_SCRIPT
+    su www -c $APP_USER_BUILD_SCRIPT
   fi
 }
 
@@ -301,11 +301,11 @@ function user_build_script() {
 # is detected in hostname and respectively
 # Development/Behat if 'behat' string is detected.
 # Globals:
-#   T3APP_VHOST_NAMES: all vhost name(s), space-separated  
+#   APP_VHOST_NAMES: all vhost name(s), space-separated  
 #########################################################
 function behat_get_vhost() {
   behat_vhost=""
-  for vhost in $T3APP_VHOST_NAMES; do
+  for vhost in $APP_VHOST_NAMES; do
     if [[ $vhost == *behat* ]]; then
       behat_vhost=$vhost
     fi
@@ -346,25 +346,25 @@ function behat_configure_yml_files() {
 #   BASH_RC_FILE
 #   BASH_RC_SOURCE_FILE
 #   CONTAINER_IP
-#   T3APP_BUILD_BRANCH
-#   T3APP_VHOST_NAMES
-#   T3APP_NAME
-#   T3APP_USER_NAME
+#   APP_BUILD_BRANCH
+#   APP_VHOST_NAMES
+#   APP_NAME
+#   APP_USER_NAME
 #########################################################
 function configure_env() {
   # Configure git, so git stash/pull always works. Otherwise git shouts about missing configuration.
   # Note: the actual values doesn't matter, most important is that they are configured.
-  git config --global user.email "${T3APP_USER_NAME}@local"
-  git config --global user.name $T3APP_USER_NAME
+  git config --global user.email "${APP_USER_NAME}@local"
+  git config --global user.name $APP_USER_NAME
 
-  # Add T3APP_VHOST_NAMES to /etc/hosts inside this container
-  echo "127.0.0.1 $T3APP_VHOST_NAMES" | tee -a /etc/hosts
+  # Add APP_VHOST_NAMES to /etc/hosts inside this container
+  echo "127.0.0.1 $APP_VHOST_NAMES" | tee -a /etc/hosts
 
   # Copy .bash_profile and substitute all necessary variables
   cat $BASH_RC_SOURCE_FILE > $BASH_RC_FILE && chown www:www $BASH_RC_FILE
   sed -i -r "s#%CONTAINER_IP%#${CONTAINER_IP}#g" $BASH_RC_FILE
   sed -i -r "s#%APP_ROOT%#${APP_ROOT}#g" $BASH_RC_FILE
-  sed -i -r "s#%T3APP_BUILD_BRANCH%#${T3APP_BUILD_BRANCH}#g" $BASH_RC_FILE
-  sed -i -r "s#%T3APP_NAME%#${T3APP_NAME}#g" $BASH_RC_FILE
-  sed -i -r "s#%T3APP_VHOST_NAMES%#${T3APP_VHOST_NAMES}#g" $BASH_RC_FILE
+  sed -i -r "s#%APP_BUILD_BRANCH%#${APP_BUILD_BRANCH}#g" $BASH_RC_FILE
+  sed -i -r "s#%APP_NAME%#${APP_NAME}#g" $BASH_RC_FILE
+  sed -i -r "s#%APP_VHOST_NAMES%#${APP_VHOST_NAMES}#g" $BASH_RC_FILE
 }
