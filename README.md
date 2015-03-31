@@ -1,13 +1,13 @@
-# TYPO3 Flow/Neos | Abstract Docker image
+# Flow/Neos | Abstract Docker image
 [![Circle CI](https://circleci.com/gh/million12/docker-typo3-flow-neos-abstract/tree/master.png?style=badge)](https://circleci.com/gh/million12/docker-typo3-flow-neos-abstract/tree/master)
 
-This is a Docker image [million12/typo3-flow-neos-abstract](https://registry.hub.docker.com/u/million12/typo3-flow-neos-abstract) which is **designed to easily create images with standard or customised installation** of [TYPO3 Flow](http://flow.typo3.org/) or [TYPO3 Neos](http://neos.typo3.org/). Your image can be build from  either the default "base" distribution or your own, perhaps private, repository. 
+This is a Docker image [million12/typo3-flow-neos-abstract](https://registry.hub.docker.com/u/million12/typo3-flow-neos-abstract) which is **designed to easily create images with standard or customised installation** of [Flow](http://flow.typo3.org/) or [Neos](http://neos.typo3.org/). Your image can be build from  either the default "base" distribution or your own, perhaps private, repository. 
 
-For an **example of TYPO3 Flow image** built on top of this one, see [million12/typo3-flow](https://github.com/million12/docker-typo3-flow) repository.
+For an **example of Flow image** built on top of this one, see [million12/typo3-flow](https://github.com/million12/docker-typo3-flow) repository.
 
-For an **example of TYPO3 Neos image** built on top of this one, see [million12/typo3-neos](https://github.com/million12/docker-typo3-neos) repository.
+For an **example of Neos image** built on top of this one, see [million12/typo3-neos](https://github.com/million12/docker-typo3-neos) repository.
 
-The image is designed that after running a container from it, you'll get working TYPO3 Flow/Neos in a matter of seconds. To achieve that, when the image is being build, it pre-installs (via `composer install`) requested version of TYPO3 Flow/Neos into /tmp location (and all its dependencies). Later on, when the container is run, it will initialise and configure that pre-installed package. This process is very quick because all source code is already in place. During that set-up, Nginx vhost(s) will be set, Settings.yaml will be updated with database credentials (see [Database connection](#database-connection) section), database will be migrated and - if it is Neos - initial Neos admin user will be created and specified site package will be imported. Read below about available ENV variables to customise your setup.
+The image is designed that after running a container from it, you'll get working Flow/Neos in a matter of seconds. To achieve that, when the image is being build, it pre-installs (via `composer install`) requested version of Flow/Neos into /tmp location (and all its dependencies). Later on, when the container is run, it will initialise and configure that pre-installed package. This process is very quick because all source code is already in place. During that set-up, Nginx vhost(s) will be set, Settings.yaml will be updated with database credentials (see [Database connection](#database-connection) section), database will be migrated and - if it is Neos - initial Neos admin user will be created and specified site package will be imported. Read below about available ENV variables to customise your setup.
 
 ## Flow or Neos installation
 
@@ -24,35 +24,35 @@ The rules are:
 
 With that it's easy to use the [default provided Nginx configuration](container-files/build-typo3-app/vhost.conf) and have your production website on `site.com` domain, `dev.site.com` for your developers and possibly e.g. `behat.dev.site.com` to run Behat tests. 
 
-With this container, you can run all TYPO3 tests, including Behat tests which requires Selenium server. There is an ENV variable **T3APP_DO_INIT_TESTS** to make this process painless. When T3APP_DO_INIT_TESTS=true, testing environment and database will be created/configured. See the section about env variables below for more info.
+With this container, you can run all Neos/Flow tests, including Behat tests which requires Selenium server. There is an ENV variable **T3APP_DO_INIT_TESTS** to make this process painless. When T3APP_DO_INIT_TESTS=true, testing environment and database will be created/configured. See the section about env variables below for more info.
 
-For the example how to run test suites included in TYPO3 Neos using this container, see the [million12/behat-selenium](https://github.com/million12/docker-behat-selenium) repository. For even more info see the [TYPO3 Neos testing documentation](http://docs.typo3.org/neos/TYPO3NeosDocumentation/DeveloperGuide/Testing/Index.html) website.
+For the example how to run test suites included in Neos using this container, see the [million12/behat-selenium](https://github.com/million12/docker-behat-selenium) repository. For even more info see the [Neos testing documentation](http://docs.typo3.org/neos/TYPO3NeosDocumentation/DeveloperGuide/Testing/Index.html) website.
 
 ## Usage
 
-As it's shown in [million12/typo3-neos](https://github.com/million12/docker-typo3-neos), you can build your own TYPO3 Neos image with following Dockerfile:
+As it's shown in [million12/typo3-neos](https://github.com/million12/docker-typo3-neos), you can build your own Neos image with following Dockerfile:
 
 ```
 FROM million12/typo3-flow-neos-abstract:latest
 
-# ENV: Install following TYPO3 Neos version
+# ENV: Install following Neos version
 ENV T3APP_BUILD_BRANCH 1.1.2
 
-# ENV: Repository for installed TYPO3 Neos distribution 
+# ENV: Repository for installed Neos distribution 
 ENV T3APP_BUILD_REPO_URL git://git.typo3.org/Neos/Distributions/Base.git
 
 # ENV: Optional composer install parameters
 #ENV T3APP_BUILD_COMPOSER_PARAMS --dev --prefer-source
 
 #
-# Pre-install TYPO3 Neos into /tmp location
+# Pre-install Neos into /tmp location
 #
 RUN . /build-typo3-app/pre-install-typo3-neos.sh
 ```
 
-This will pre-install default TYPO3 Neos distribution, version 1.1.2. Uncomment and provide custom `ENV T3APP_BUILD_REPO_URL` to install your own distribution.
+This will pre-install default Neos distribution, version 1.1.2. Uncomment and provide custom `ENV T3APP_BUILD_REPO_URL` to install your own distribution.
 
-See [README.md](https://github.com/million12/docker-typo3-neos/README.md) from [million12/typo3-neos](https://github.com/million12/docker-typo3-neos) for more information about how to run all required containers (e.g. MariaDB) and have working instance of TYPO3 Neos.
+See [README.md](https://github.com/million12/docker-typo3-neos/README.md) from [million12/typo3-neos](https://github.com/million12/docker-typo3-neos) for more information about how to run all required containers (e.g. MariaDB) and have working instance of Neos.
 
 ## How does it work
 
@@ -60,14 +60,14 @@ You start with creating a new Docker image based on **million12/typo3-flow-neos-
 
 #### Build phase
 
-During *build process* of your image, TYPO3 app will be pre-installed using `composer install` and embedded inside the image as a tar achive. Using ENV variables (listed below) you can customise pre-install process: provide custom distribution (e.g. from your GitHub repo) or specify different branch/tag. For detailed info about how this pre-install script works, see [pre-install-typo3-app.sh](container-files/build-typo3-app/pre-install-typo3-app.sh).
+During *build process* of your image, Neos/Flow app will be pre-installed using `composer install` and embedded inside the image as a tar achive. Using ENV variables (listed below) you can customise pre-install process: provide custom distribution (e.g. from your GitHub repo) or specify different branch/tag. For detailed info about how this pre-install script works, see [pre-install-typo3-app.sh](container-files/build-typo3-app/pre-install-typo3-app.sh).
 It is posible to not use pre-installed app and compose app on first container start with setting `T3APP_PREINSTALL` variable to false (and not calling `RUN . /build-typo3-app/pre-install-typo3-app.sh` your image).
 
 In addition, if in the root directory of your project you have executable `build.sh` it will be executed as `build.sh --preinstall`. You can easily add custom build steps there which you want to run during Docker build phase. See `T3APP_USER_BUILD_SCRIPT` variable where you can customise path to that script.
 
 #### Container launched
 
-When you start that prepared container, it will run [configure-typo3-app.sh](container-files/build-typo3-app/configure-typo3-app.sh) script which does all necessary steps to make TYPO3 Flow/Neos up & running. 
+When you start that prepared container, it will run [configure-typo3-app.sh](container-files/build-typo3-app/configure-typo3-app.sh) script which does all necessary steps to make Flow/Neos up & running. 
 
 Here are the details:
 
@@ -76,8 +76,8 @@ File [vhost.conf](container-files/build-typo3-app/vhost.conf) is used as a model
 
 You can completely override that template file if you need custom configuration. Note that this vhost config file will be overridden/regenerated each time container starts unless you set env variable `T3APP_FORCE_VHOST_CONF_UPDATE=false`.
 
-##### TYPO3 app install
-TYPO3 app which was pre-installed during the image build process is unpacked to /data/www/$T3APP_NAME and - optionally - git pull is executed (if `T3APP_ALWAYS_DO_PULL` is set to true).
+##### Neos/Flow app install
+Neos/Flow app which was pre-installed during the image build process is unpacked to /data/www/$T3APP_NAME and - optionally - git pull is executed (if `T3APP_ALWAYS_DO_PULL` is set to true).
 
 ##### Database config
 Default Configuration/Settings.yaml is created (if doesn't exist) and updated with DB credentials. Read on [Database connection](#database-connection) section for more info. Database `T3APP_DB_NAME` is created if it does not exist yet.
@@ -104,7 +104,7 @@ FROM million12/typo3-flow-neos-abstract:latest
 # Default: master
 ENV T3APP_BUILD_BRANCH 2.2.2
 
-# ENV: Repository for installed TYPO3 app
+# ENV: Repository for installed Neos/Flow app
 # Default: git://git.typo3.org/Flow/Distributions/Base.git
 ENV T3APP_BUILD_REPO_URL https://github.com/you/your-typo3-flow-app.git
 
@@ -145,11 +145,11 @@ These are variables relevant during build process of your custom image:
 
 **T3APP_BUILD_REPO_URL**  
 Default: `T3APP_BUILD_REPO_URL=git://git.typo3.org/Flow/Distributions/Base.git`  
-By default it points to TYPO3 Flow base distribution. Override it to `git://git.typo3.org/Neos/Distributions/Base.git` to install TYPO3 Neos base distribution. Provide your own repository to install your own Flow/Neos distribution. The repository can be private: read more above for an example how to configure/access private repositories. Remember to use git url in SSH format for private repositories, i.e. *git@github.com:user/package.git*.
+By default it points to Flow base distribution. Override it to `git://git.typo3.org/Neos/Distributions/Base.git` to install Neos base distribution. Provide your own repository to install your own Flow/Neos distribution. The repository can be private: read more above for an example how to configure/access private repositories. Remember to use git url in SSH format for private repositories, i.e. *git@github.com:user/package.git*.
 
 **T3APP_BUILD_BRANCH**  
 Default: `T3APP_BUILD_BRANCH=master`  
-Branch or tag name to checkout during pre-install phase. For instance, to install default TYPO3 Neos base distribution, but one of stable or older version, you might want to override it with e.g. `1.1.2`.
+Branch or tag name to checkout during pre-install phase. For instance, to install default Neos base distribution, but one of stable or older version, you might want to override it with e.g. `1.1.2`.
 
 **T3APP_BUILD_COMPOSER_PARAMS**  
 Default: `T3APP_BUILD_COMPOSER_PARAMS=--dev --prefer-source`  
@@ -161,11 +161,11 @@ Following is the list of available ENV variables relevant during runtime phase (
 
 **T3APP_DO_INIT**  
 Default: `T3APP_DO_INIT=true`  
-When set to TRUE (default), TYPO3 app will be fully configured and set up, incl. db migration and importing/installing specified site package (Neos only). It might be useful to set it to FALSE when you only want to run tests against this container and you do not need working site.
+When set to TRUE (default), Neos/Flow app will be fully configured and set up, incl. db migration and importing/installing specified site package (Neos only). It might be useful to set it to FALSE when you only want to run tests against this container and you do not need working site.
 
 **T3APP_DO_INIT_TESTS**  
 Default: `T3APP_DO_INIT_TESTS=false`  
-Configure TYPO3 app for running Behat tests. You need to have `flowpack/behat` installed in your `composer.json`.
+Configure Neos/Flow app for running Behat tests. You need to have `flowpack/behat` installed in your `composer.json`.
 
 When you set this option to TRUE, you have to add extra vhost in format `behat.dev.[your-base-domain]` in *T3APP_VHOST_NAMES* variable. This so-called "Behat vhost" will be added to all behat.yml files across all packages and will be used for Behat testing; also it will be used to set proper `FLOW_CONTEXT` for that vhost.
 
@@ -173,7 +173,7 @@ When this option is set to TRUE, an empty database for Behat testing is created 
 
 Note: You *don't* have to set this option to run unit and/or functional tests. Unit and functional tests work out of the box (technical background: functional tests run in `Testing` context, which is out-of-box configured to use `pdo_sqlite` with in-memory tables).
 
-For an example how to run all Behat test suites included in TYPO3 Neos, see the [circle.yml](circle.yml) which contains example of running Behat tests.
+For an example how to run all Behat test suites included in Neos, see the [circle.yml](circle.yml) which contains example of running Behat tests.
 
 **T3APP_NAME**  
 Default: `T3APP_NAME=typo3-app`  
@@ -280,7 +280,7 @@ If you need more flexible setup, customise it with the following ENV variables.
 
 **T3APP_DB_NAME**  
 Default: `T3APP_DB_NAME=${T3APP_NAME}`  
-Database name, which will be used for TYPO3 app. It will be created (if does not exist) and migrated (for fresh installations). Note: all non-allowed in db identifiers characters will be replaced with `_` char when using the db name from `T3APP_NAME` value (which might contain e.g. `-` chars).
+Database name, which will be used for Neos/Flow app. It will be created (if does not exist) and migrated (for fresh installations). Note: all non-allowed in db identifiers characters will be replaced with `_` char when using the db name from `T3APP_NAME` value (which might contain e.g. `-` chars).
 
 **T3APP_DB_HOST**  
 Default: `T3APP_DB_HOST=db`  
@@ -304,4 +304,4 @@ Author: Marcin Ryzycki (<marcin@m12.io>)
 
 ---
 
-**Sponsored by** [Typostrap.io - the new prototyping tool](http://typostrap.io/) for building highly-interactive prototypes of your website or web app. Built on top of TYPO3 Neos CMS and Zurb Foundation framework.
+**Sponsored by** [Typostrap.io - the new prototyping tool](http://typostrap.io/) for building highly-interactive prototypes of your website or web app. Built on top of Neos and Zurb Foundation framework.
