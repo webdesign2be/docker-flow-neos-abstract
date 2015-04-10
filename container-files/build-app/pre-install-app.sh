@@ -29,6 +29,7 @@ CWD="/tmp"
 cd $CWD
 
 # Clone Neos/Flow app code from provided repository
+echo git clone -v $APP_BUILD_REPO_URL $INSTALLED_PACKAGE_NAME
 git clone $APP_BUILD_REPO_URL $INSTALLED_PACKAGE_NAME
 cd $INSTALLED_PACKAGE_NAME
 
